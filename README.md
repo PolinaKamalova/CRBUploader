@@ -5,7 +5,9 @@ This program reads quotations provided by CRB and uploads it to the local Postgr
 The docker-compose file will be added later
 
 Database
-![image](https://github.com/PolinaKamalova/CRBUploader/assets/79357093/8ed191af-9783-483c-b3d9-31433743fbab)
+![image](https://github.com/PolinaKamalova/CRBUploader/assets/79357093/fb20eadf-93e6-49aa-ac64-b0808294a4d8)
+
 
 Database structure with ID as Primary Key
 
+![image](https://github.com/PolinaKamalova/CRBUploader/assets/79357093/855efd73-4503-478a-b2b6-a14c7fbb9d2d)
