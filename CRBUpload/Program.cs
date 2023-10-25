@@ -11,36 +11,18 @@ class Program
 {
     static void Main()
     {
-        Console.WriteLine("Good Afternoon! Please select one of the further options by entering the corresponding number");
-        Console.WriteLine("1. Add today quotes to the database");
-        Console.WriteLine("2. Add monthly quotes to the database");
-        Console.WriteLine("3. Exit");
 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        string choice = Console.ReadLine();
-
-        switch (choice)
+        var date = DateTime.Today;
+        for (int i = 0; i < 31; i++)
         {
-            case "1":
-                string todayDate = DateTime.Today.ToString("dd/MM/yyyy");
-                Console.WriteLine(UploadTodayQuotes(todayDate));
-                break;
-            case "2":
-                var date = DateTime.Today;
-                for (int i = 0; i < 30; i++)
-                {
-                    UploadTodayQuotes(date.ToString("dd/MM/yyyy"));
-                    date = date.AddDays(-1);
-                }
-                break;
-            case "3":
-                Environment.Exit(0);
-                break;
-            default:
-                Console.WriteLine("Wrong choice. Please try again");
-                break;
+            date = date.AddDays(-1);
+            UploadTodayQuotes(date.ToString("dd/MM/yyyy"));
         }
+
+        string todayDate = DateTime.Today.ToString("dd/MM/yyyy");
+        Console.WriteLine(UploadTodayQuotes(todayDate));
     }
 
     public static string UploadTodayQuotes(string todayDate)
@@ -83,11 +65,12 @@ class Program
 
             connection.Open();
 
-            string sqlCheck = "SELECT COUNT(date) FROM quotations WHERE date='" + todayDate+"'";
+            string sqlCheck = "SELECT date FROM quotations WHERE date='" + todayDate + "' LIMIT 1;";
             using (NpgsqlCommand commandCheck = new NpgsqlCommand(sqlCheck, connection))
             {
-                int check = commandCheck.ExecuteNonQuery();
-                if (check <= 0)
+                //check if needs to add info on daily quotes
+                var check = Convert.ToString(commandCheck.ExecuteScalar());
+                if (check.Equals(""))
                 {
                     //read daily cotirovkas info, upload to the temporary variables to incorporate into sql command
                     foreach (XmlNode node in xmlDoc.SelectNodes("//ValCurs/Valute"))
@@ -95,8 +78,9 @@ class Program
                         string numCode = node.SelectSingleNode("NumCode").InnerText;
                         string charCode = node.SelectSingleNode("CharCode").InnerText;
                         string name = node.SelectSingleNode("Name").InnerText;
-                        double value = Convert.ToDouble(node.SelectSingleNode("Value").InnerText, CultureInfo.InvariantCulture);
-
+                        NumberFormatInfo provider = new NumberFormatInfo();
+                        provider.NumberDecimalSeparator = ",";
+                        double value = Convert.ToDouble(node.SelectSingleNode("VunitRate").InnerText, provider);
                         // adding new information to the database
                         string sql = "INSERT INTO quotations(id, charcode, name, value, numcode, date) VALUES (@id, @charcode, @name, @value, @numcode, @date)";
                         using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
@@ -109,7 +93,7 @@ class Program
                             command.Parameters.AddWithValue("@date", todayDate);
 
 
-                            command.ExecuteNonQuery();
+                           command.ExecuteNonQuery();
                         }
 
                         result = "Data for " + todayDate + " has been uploaded";
