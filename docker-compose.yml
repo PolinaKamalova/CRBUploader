@@ -1,0 +1,25 @@
+﻿version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: quotes
+    ports:
+      - "5435:5432"  # Expose PostgreSQL port
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d  # Mount init-scripts directory as PostgreSQL initialization scripts
+
+
+  # C# Application
+  crbupload:
+    build:
+      context: ./  # Path to project folder
+      dockerfile: ./CRBUpload\Dockerfile  # Dockerfile for C# application
+    depends_on:
+      - postgres
+    ports:
+      - "80:80"  # Expose C# application port
