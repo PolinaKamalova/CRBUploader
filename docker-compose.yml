@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: quotes
     ports:
-      - "5435:5432"  # Expose PostgreSQL port
+      - "5432:5432"  # Expose PostgreSQL port
     volumes:
       - ./init-scripts:/docker-entrypoint-initdb.d  # Mount init-scripts directory as PostgreSQL initialization scripts
 
